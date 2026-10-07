@@ -21,27 +21,46 @@ const Payment = () => {
     setPaymentStatus('processing');
     
     try {
+      console.log('Sending booking data:', bookingData);
+      
+      // Map field names to match backend schema
+      const bookingPayload = {
+        patientName: bookingData.name,
+        patientEmail: bookingData.patientEmail,
+        patientPhone: bookingData.patientPhone,
+        patientAge: bookingData.age,
+        patientGender: bookingData.gender,
+        patientWeight: bookingData.weight,
+        symptoms: bookingData.symptoms,
+        doctorId: bookingData.doctorId,
+        doctorName: bookingData.doctorName,
+        date: bookingData.date,
+        timeSlot: bookingData.timeSlot,
+        paymentStatus: 'paid'
+      };
+      
+      console.log('Mapped booking payload:', bookingPayload);
+      
       // Submit booking to backend
       const response = await fetch('http://localhost:5000/api/booking', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...bookingData,
-          paymentStatus: 'paid'
-        }),
+        body: JSON.stringify(bookingPayload),
       });
 
+      const data = await response.json();
+      console.log('Response:', data);
+
       if (response.ok) {
-        const data = await response.json();
         setTimeout(() => {
           setPaymentStatus('success');
           localStorage.removeItem('pendingBooking');
           localStorage.setItem('lastBooking', JSON.stringify(data));
         }, 2000);
       } else {
-        alert('Failed to create booking. Please try again.');
+        alert(`Failed to create booking: ${data.message || 'Please try again.'}`);
         setPaymentStatus('pending');
       }
     } catch (error) {

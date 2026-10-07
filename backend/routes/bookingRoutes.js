@@ -7,6 +7,8 @@ const router = express.Router();
 // Create new booking
 router.post('/', async (req, res) => {
   try {
+    console.log('Received booking data:', req.body);
+    
     const {
       patientName,
       patientEmail,
@@ -21,6 +23,10 @@ router.post('/', async (req, res) => {
       timeSlot,
       paymentStatus
     } = req.body;
+
+    if (!doctorId) {
+      return res.status(400).json({ message: 'Doctor ID is required' });
+    }
 
     const booking = await Booking.create({
       patientName,
@@ -38,8 +44,10 @@ router.post('/', async (req, res) => {
       status: 'confirmed'
     });
 
+    console.log('Booking created successfully:', booking);
     res.status(201).json(booking);
   } catch (error) {
+    console.error('Booking creation error:', error);
     res.status(500).json({ message: error.message });
   }
 });
